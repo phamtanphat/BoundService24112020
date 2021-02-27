@@ -21,6 +21,7 @@ public class MyBoundService extends Service {
     NotificationManager mNotificationManager;
     NotificationCompat.Builder mBuilder;
     String CHANNEL_ID = "MY_CHANNEL";
+    OnDataChange mOnDataChange;
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
@@ -41,6 +42,9 @@ public class MyBoundService extends Service {
             @Override
             public void run() {
                 mCount++;
+                if (mOnDataChange != null){
+                    mOnDataChange.changeCount(mCount);
+                }
                 mNotificationManager.notify(1 , createNotification(mCount).build());
                 new Handler().postDelayed(this , 1000);
             }
@@ -91,5 +95,9 @@ public class MyBoundService extends Service {
             // Return this instance of LocalService so clients can call public methods
             return MyBoundService.this;
         }
+    }
+
+    public void setOnDataChange(OnDataChange onDataChange){
+        mOnDataChange = onDataChange;
     }
 }
