@@ -16,7 +16,7 @@ import androidx.core.app.NotificationCompat;
 
 public class MyBoundService extends Service {
 
-    int count = 0;
+    int mCount = 0;
     NotificationManager mNotificationManager;
     NotificationCompat.Builder mBuilder;
     String CHANNEL_ID = "MY_CHANNEL";
@@ -29,7 +29,7 @@ public class MyBoundService extends Service {
     @Override
     public void onCreate() {
         mNotificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-        mBuilder = createNotification();
+        mBuilder = createNotification(mCount);
         startForeground(1 , mBuilder.build());
         super.onCreate();
     }
@@ -39,13 +39,14 @@ public class MyBoundService extends Service {
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                count++;
+                mCount++;
+                mNotificationManager.notify(1 , createNotification(mCount).build());
                 new Handler().postDelayed(this , 1000);
             }
         },1000);
         return super.onStartCommand(intent, flags, startId);
     }
-    private NotificationCompat.Builder createNotification(){
+    private NotificationCompat.Builder createNotification(int count){
         Intent intent = new Intent(this , MainActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
@@ -58,8 +59,8 @@ public class MyBoundService extends Service {
         NotificationCompat.Builder notify = new NotificationCompat.Builder(MyBoundService.this, CHANNEL_ID)
                 .setSmallIcon(android.R.drawable.btn_star)
                 .setShowWhen(true)
-                .setContentTitle("Thông báo mới")
-                .setContentText("Có phiên bản mới")
+                .setContentTitle("Xử lý tiến trình")
+                .setContentText("Đang xử lý " + count)
                 .addAction(R.mipmap.ic_launcher , "Open App" ,pendingIntent)
                 .setPriority(2);
 
