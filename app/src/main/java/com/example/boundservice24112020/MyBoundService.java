@@ -22,6 +22,7 @@ public class MyBoundService extends Service {
     NotificationCompat.Builder mBuilder;
     String CHANNEL_ID = "MY_CHANNEL";
     OnDataChange mOnDataChange;
+    boolean mIsRunning = false;
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
@@ -38,24 +39,28 @@ public class MyBoundService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                mCount++;
-                if (mOnDataChange != null){
-                    mOnDataChange.changeCount(mCount);
+        if (!mIsRunning){
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    mIsRunning = true;
+                    mCount++;
+                    if (mOnDataChange != null){
+                        mOnDataChange.changeCount(mCount);
+                    }
+                    mNotificationManager.notify(1 , createNotification(mCount).build());
+                    new Handler().postDelayed(this , 1000);
                 }
-                mNotificationManager.notify(1 , createNotification(mCount).build());
-                new Handler().postDelayed(this , 1000);
-            }
-        },1000);
-        return super.onStartCommand(intent, flags, startId);
+            },1000);
+        }
+
+        return START_STICKY;
     }
     private NotificationCompat.Builder createNotification(int count){
         Intent intent = new Intent(this , MainActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
-        PendingIntent pendingIntent = PendingIntent.getService(
+        PendingIntent pendingIntent = PendingIntent.getActivity(
                 this,
                 123,
                 intent,
