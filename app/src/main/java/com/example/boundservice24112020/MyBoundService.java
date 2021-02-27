@@ -7,6 +7,7 @@ import android.app.Service;
 import android.content.Intent;
 import android.graphics.Color;
 import android.media.AudioAttributes;
+import android.os.Binder;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
@@ -23,7 +24,7 @@ public class MyBoundService extends Service {
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
-        return null;
+        return new LocalIBinder();
     }
 
     @Override
@@ -76,12 +77,19 @@ public class MyBoundService extends Service {
                     .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
                     .setUsage(AudioAttributes.USAGE_NOTIFICATION)
                     .build();
-            notificationChannel.enableVibration(true);
+            notificationChannel.enableVibration(false);
             notificationChannel.enableLights(true);
             notificationChannel.setLightColor(Color.RED);
             mNotificationManager.createNotificationChannel(notificationChannel);
         }
         return notify;
 
+    }
+
+    class LocalIBinder extends Binder {
+        MyBoundService getService() {
+            // Return this instance of LocalService so clients can call public methods
+            return MyBoundService.this;
+        }
     }
 }
